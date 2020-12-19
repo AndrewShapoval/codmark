@@ -1,0 +1,60 @@
+.mainBlock {
+
+  .mainContainer {
+    height: 100%;
+    width: 80%;
+    margin: 0 auto;
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    .form {
+      display: flex;
+      margin-bottom: 20px;
+
+      .load {
+        background-color: green;
+        color: white;
+        margin-left: 10px;
+        width: 100px;
+      }
+
+      .clear {
+        background-color: red;
+        color: white;
+        margin-left: 10px;
+      }
+
+      .group {
+        background-color: blue;
+        color: white;
+        margin-left: 10px;
+      }
+    }
+
+    .images {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+
+      .image {
+        width: 340px;
+        height: 340px;
+        border: 1px solid;
+        border-radius: 4px;
+        margin: 10px;
+
+        .img {
+          max-width: 98%;
+          max-height: 98%;
+          margin: 2px 2px 2px 2px;
+        }
+      }
+    }
+  }
+}
