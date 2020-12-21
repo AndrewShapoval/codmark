@@ -5,7 +5,8 @@ const initialState = {
     status: "idle" as RequestStatusType,
     images: [] as Array<ImageType>,
     responseMessage: "",
-    uniqueTagsNames: [] as Array<string>
+    uniqueTagsNames: [] as Array<string>,
+    compositeImage: [] as Array<string>
 }
 
 export const appReducer = (state: InitialStateType = initialState, action: ActionsType): InitialStateType => {
@@ -15,7 +16,7 @@ export const appReducer = (state: InitialStateType = initialState, action: Actio
         case "APP/SET_IMAGE":
             return {...state, images: [...state.images, {id: action.id, image_url: action.image_url, tag: action.tag}]}
         case "APP/REMOVE_IMAGE":
-            return {...state, images: [], uniqueTagsNames: []}
+            return {...state, images: [], uniqueTagsNames: [], compositeImage: []}
         case "APP/SET_RESPONSE_MESSAGE":
             return {...state, responseMessage: action.message}
         case "APP/SET_UNIQUE_TAG_NAME":
@@ -27,6 +28,8 @@ export const appReducer = (state: InitialStateType = initialState, action: Actio
                 }
             }
             return {...state, uniqueTagsNames: [action.tag]}
+        case "APP/SET_COMPOSITE_IMAGE":
+            return {...state, compositeImage: [action.imgI, action.imgB]}
         default:
             return state
     }
@@ -37,6 +40,7 @@ const setUniqueTagNameAC = (tag: string) => ({type: "APP/SET_UNIQUE_TAG_NAME", t
 export const removeImageAC = () => ({type: "APP/REMOVE_IMAGE"} as const)
 export const setAppStatusAC = (status: RequestStatusType) => ({type: "APP/SET_STATUS", status} as const)
 export const setResponseMessageAC = (message: string) => ({type: "APP/SET_RESPONSE_MESSAGE", message} as const)
+export const setCompositeImageAC = (imgI: string, imgB: string) => ({type: "APP/SET_COMPOSITE_IMAGE", imgI, imgB} as const)
 
 export const getImageTC = (tag: string) => (dispatch: Dispatch<ActionsType>) => {
     dispatch(setAppStatusAC('loading'))
@@ -60,6 +64,19 @@ export const getImageTC = (tag: string) => (dispatch: Dispatch<ActionsType>) => 
         })
 }
 
+export const getCompositeImageTC = (tags: Array<string>) => async (dispatch: Dispatch<ActionsType>) => {
+    dispatch(setAppStatusAC('loading'))
+    try {
+        const res = await Promise.all([appAPI.getImage(tags[0]), appAPI.getImage(tags[1])])
+        const imgI = res[0].data.data.image_url
+        const imgB = res[1].data.data.image_url
+        dispatch(setCompositeImageAC(imgI, imgB))
+    } catch (e) {
+        dispatch(setResponseMessageAC("Произошла http ошибка"))
+    }
+    dispatch(setAppStatusAC('succeeded'))
+}
+
 export type InitialStateType = typeof initialState
 
 type ActionsType =
@@ -67,7 +84,8 @@ type ActionsType =
     ReturnType<typeof setImageAC> |
     ReturnType<typeof removeImageAC> |
     ReturnType<typeof setResponseMessageAC> |
-    ReturnType<typeof setUniqueTagNameAC>
+    ReturnType<typeof setUniqueTagNameAC> |
+    ReturnType<typeof setCompositeImageAC>
 
 export type RequestStatusType = 'idle' | 'loading' | 'succeeded' | 'failed';
 

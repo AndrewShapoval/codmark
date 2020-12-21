@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import styles from "./Main.module.scss"
 import {useFormik} from "formik";
 import {useDispatch, useSelector} from "react-redux";
-import {getImageTC, ImageType, removeImageAC, RequestStatusType} from "../../../m2_bll/appReducer";
+import {getCompositeImageTC, getImageTC, ImageType, removeImageAC, RequestStatusType} from "../../../m2_bll/appReducer";
 import {AppRootStateType} from "../../../m2_bll/store";
 import {Modal} from "../common/Modal/Modal";
 import {GroupedTags} from "./GroupedTags/GroupedTags";
@@ -16,6 +16,7 @@ export const Main = () => {
     const responseMessage = useSelector<AppRootStateType, string>(state => state.app.responseMessage)
     const [modalActive, setModalActive] = useState(false)
     const [isGroup, setIsGroup] = useState(false)
+    const compositeImage = useSelector<AppRootStateType, Array<string>>(state => state.app.compositeImage)
 
     const formik = useFormik({
         initialValues: {
@@ -25,13 +26,20 @@ export const Main = () => {
             const errors: FormikErrorType = {}
             if (!values.tag) {
                 errors.tag = "Заполните поле 'тег'"
-            } else if (!/^[a-z,]+$/i.test(values.tag)) {
+            } else if (!/^[a-z, ]+$/i.test(values.tag)) {
                 errors.tag = "Разрешены только буквы латинского алфавита"
             }
             return errors
         },
         onSubmit: values => {
-            dispatch(getImageTC(values.tag))
+            if (values.tag.indexOf(",") === -1) {
+                dispatch(getImageTC(values.tag))
+            } else {
+                let tags = values.tag.split(/\s*,\s*/)
+                dispatch(getCompositeImageTC(tags))
+                debugger
+            }
+
         }
     })
 
@@ -77,7 +85,17 @@ export const Main = () => {
                         : <button className={styles.group} type={"button"}
                                   onClick={() => setIsGroup(false)}>Разгруппировать</button>}
                 </form>
-
+                {
+                    compositeImage.length > 0
+                        ? <div className={styles.compositeImageBlock}>
+                            {compositeImage.map((img, i) =>
+                                <div key={i} className={styles.compositeImage}>
+                                    <img src={img} className={styles.img}/>
+                                </div>
+                            )}
+                        </div>
+                        : null
+                }
                 {!isGroup
                     ? <div className={styles.images}>
                         {images && images.map((img, index) =>

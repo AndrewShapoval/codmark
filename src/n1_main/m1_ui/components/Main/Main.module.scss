@@ -35,6 +35,21 @@
       }
     }
 
+    .compositeImageBlock {
+      width: auto;
+      height: auto;
+      border: 1px solid black;
+
+      compositeImage {
+        display: flex;
+        flex-direction: column;
+        .img {
+          width: auto;
+          height: auto;
+        }
+      }
+    }
+
     .images {
       display: flex;
       flex-direction: row;
@@ -43,19 +58,19 @@
       justify-content: center;
       margin: 0 auto;
 
-      .image {
-        width: 340px;
-        height: 340px;
-        border: 1px solid;
-        border-radius: 4px;
-        margin: 10px;
-
-        .img {
-          max-width: 98%;
-          max-height: 98%;
-          margin: 2px 2px 2px 2px;
-        }
-      }
+      //.image {
+      //  width: 340px;
+      //  height: 340px;
+      //  border: 1px solid;
+      //  border-radius: 4px;
+      //  margin: 10px;
+      //
+      //  .img {
+      //    max-width: 98%;
+      //    max-height: 98%;
+      //    margin: 2px 2px 2px 2px;
+      //  }
+      //}
     }
   }
 }
