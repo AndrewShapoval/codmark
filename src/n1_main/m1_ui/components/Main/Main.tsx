@@ -5,6 +5,8 @@ import {useDispatch, useSelector} from "react-redux";
 import {getImageTC, ImageType, removeImageAC, RequestStatusType} from "../../../m2_bll/appReducer";
 import {AppRootStateType} from "../../../m2_bll/store";
 import {Modal} from "../common/Modal/Modal";
+import {GroupedTags} from "./GroupedTags/GroupedTags";
+import {Image} from "./Image/Image";
 
 export const Main = () => {
 
@@ -13,6 +15,7 @@ export const Main = () => {
     const appStatus = useSelector<AppRootStateType, RequestStatusType>(state => state.app.status)
     const responseMessage = useSelector<AppRootStateType, string>(state => state.app.responseMessage)
     const [modalActive, setModalActive] = useState(false)
+    const [isGroup, setIsGroup] = useState(false)
 
     const formik = useFormik({
         initialValues: {
@@ -34,7 +37,9 @@ export const Main = () => {
 
     //Обработчик onSubmit формика и активация модалки
     const formikHandleSubmit = () => {
-        setModalActive(true)
+        if (formik.errors) {
+            setModalActive(true)
+        }
         formik.handleSubmit()
     }
 
@@ -66,17 +71,22 @@ export const Main = () => {
                         {appStatus === "loading" ? "Загрузка..." : "Загрузить"}
                     </button>
                     <button className={styles.clear} type={"button"} onClick={handlerRemoveImages}>Очистить</button>
-                    <button className={styles.group} type={"button"}>Группировать</button>
+                    {!isGroup
+                        ? <button className={styles.group} type={"button"}
+                                  onClick={() => setIsGroup(true)}>Группировать</button>
+                        : <button className={styles.group} type={"button"}
+                                  onClick={() => setIsGroup(false)}>Разгруппировать</button>}
                 </form>
-                <div className={styles.images}>
-                    {images
-                        ? images.map(img =>
-                            <div key={img.id} className={styles.image}>
-                                <img className={styles.img} src={img.image_url}
-                                     onClick={() => handlerSetTagValueInput(img.tag)} alt={img.tag}/>
-                            </div>)
-                        : null}
-                </div>
+
+                {!isGroup
+                    ? <div className={styles.images}>
+                        {images && images.map((img, index) =>
+                            <Image handlerSetTagValueInput={handlerSetTagValueInput} image={img}
+                                   key={`${img.id} ${index}`}/>
+                        )}
+                    </div>
+                    : <GroupedTags handlerSetTagValueInput={handlerSetTagValueInput}/>
+                }
             </div>
         </div>
     )

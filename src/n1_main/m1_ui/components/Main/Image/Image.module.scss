@@ -1,0 +1,13 @@
+.image {
+  width: 340px;
+  height: 340px;
+  border: 1px solid;
+  border-radius: 4px;
+  margin: 10px;
+
+  .img {
+    max-width: 98%;
+    max-height: 98%;
+    margin: 2px 2px 2px 2px;
+  }
+}
