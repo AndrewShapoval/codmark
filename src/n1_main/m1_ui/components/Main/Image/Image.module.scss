@@ -6,10 +6,15 @@
   margin: 10px;
 
   .img {
-    width: auto;
-    height: auto;
+    max-width: 98%;
+    max-height: 98%;
+    margin: 2px 2px 2px 2px;
+  }
+
+  .imgComposite {
     max-width: 98%;
     max-height: 48%;
+    object-fit: cover;
     margin: 2px 2px 2px 2px;
   }
 }

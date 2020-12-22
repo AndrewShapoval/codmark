@@ -31,7 +31,15 @@ export const Main = () => {
             return errors
         },
         onSubmit: values => {
-            dispatch(getImageTC(values.tag))
+            if (values.tag !== "delay") {
+                dispatch(getImageTC(values.tag))
+            } else {
+                let someArray = ["cat", "dog", "car", "cat, dog", "cat, car", "dog, car"]
+                setInterval(() => {
+                    let some = Math.floor(Math.random() * someArray.length)
+                    dispatch(getImageTC(someArray[some]))
+                }, 5000)
+            }
         }
     })
     //Обработчик onSubmit формика и активация модалки
@@ -39,7 +47,7 @@ export const Main = () => {
 
         if (formik.errors || !formik.values.tag) {
             formik.errors.tag && dispatch(setResponseMessageAC(formik.errors.tag))
-            setTimeout(()=> dispatch(setResponseMessageAC("")), 4000)
+            setTimeout(() => dispatch(setResponseMessageAC("")), 4000)
             setModalActive(true)
         } else {
             setModalActive(false)
