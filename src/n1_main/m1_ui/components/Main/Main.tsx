@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import styles from "./Main.module.scss"
 import {useFormik} from "formik";
 import {useDispatch, useSelector} from "react-redux";
-import {getCompositeImageTC, getImageTC, ImageType, removeImageAC, RequestStatusType} from "../../../m2_bll/appReducer";
+import {getImageTC, ImageType, removeImageAC, RequestStatusType, setResponseMessageAC} from "../../../m2_bll/appReducer";
 import {AppRootStateType} from "../../../m2_bll/store";
 import {Modal} from "../common/Modal/Modal";
 import {GroupedTags} from "./GroupedTags/GroupedTags";
@@ -16,7 +16,6 @@ export const Main = () => {
     const responseMessage = useSelector<AppRootStateType, string>(state => state.app.responseMessage)
     const [modalActive, setModalActive] = useState(false)
     const [isGroup, setIsGroup] = useState(false)
-    const compositeImage = useSelector<AppRootStateType, Array<string>>(state => state.app.compositeImage)
 
     const formik = useFormik({
         initialValues: {
@@ -32,31 +31,26 @@ export const Main = () => {
             return errors
         },
         onSubmit: values => {
-            if (values.tag.indexOf(",") === -1) {
-                dispatch(getImageTC(values.tag))
-            } else {
-                let tags = values.tag.split(/\s*,\s*/)
-                dispatch(getCompositeImageTC(tags))
-                debugger
-            }
-
+            dispatch(getImageTC(values.tag))
         }
     })
-
     //Обработчик onSubmit формика и активация модалки
     const formikHandleSubmit = () => {
-        if (formik.errors) {
-            setModalActive(true)
-        }
-        formik.handleSubmit()
-    }
 
+        if (formik.errors || !formik.values.tag) {
+            formik.errors.tag && dispatch(setResponseMessageAC(formik.errors.tag))
+            setTimeout(()=> dispatch(setResponseMessageAC("")), 4000)
+            setModalActive(true)
+        } else {
+            setModalActive(false)
+            formik.handleSubmit()
+        }
+    }
     // Обработчик удаления изображений из стейта
     const handlerRemoveImages = () => {
         dispatch(removeImageAC())
         formik.resetForm()
     }
-
     //Обработчик установки тега в инпут
     const handlerSetTagValueInput = (tag: string) => {
         formik.setFieldValue("tag", tag)
@@ -64,16 +58,15 @@ export const Main = () => {
 
     return (
         <div className={styles.mainBlock}>
-            {responseMessage ? <Modal active={modalActive} setActive={setModalActive} text={responseMessage}/> : null}
+            {
+                responseMessage
+                    ? <Modal active={modalActive} setActive={setModalActive} text={responseMessage}/>
+                    : null
+            }
             <div className={styles.mainContainer}>
                 <form onSubmit={formik.handleSubmit} className={styles.form}>
                     <input type="text" placeholder="введите тег"
                            onChange={formik.handleChange} name={"tag"} value={formik.values.tag}/>
-                    {
-                        formik.errors.tag
-                            ? <Modal active={modalActive} setActive={setModalActive} text={formik.errors.tag}/>
-                            : null
-                    }
                     <button className={styles.load} value={"send"} disabled={appStatus === "loading"}
                             onClick={formikHandleSubmit} type={"submit"}>
                         {appStatus === "loading" ? "Загрузка..." : "Загрузить"}
@@ -86,24 +79,14 @@ export const Main = () => {
                                   onClick={() => setIsGroup(false)}>Разгруппировать</button>}
                 </form>
                 {
-                    compositeImage.length > 0
-                        ? <div className={styles.compositeImageBlock}>
-                            {compositeImage.map((img, i) =>
-                                <div key={i} className={styles.compositeImage}>
-                                    <img src={img} className={styles.img}/>
-                                </div>
+                    !isGroup
+                        ? <div className={styles.images}>
+                            {images && images.map((img, index) =>
+                                <Image handlerSetTagValueInput={handlerSetTagValueInput} image={img}
+                                       key={`${img.id} ${index}`}/>
                             )}
                         </div>
-                        : null
-                }
-                {!isGroup
-                    ? <div className={styles.images}>
-                        {images && images.map((img, index) =>
-                            <Image handlerSetTagValueInput={handlerSetTagValueInput} image={img}
-                                   key={`${img.id} ${index}`}/>
-                        )}
-                    </div>
-                    : <GroupedTags handlerSetTagValueInput={handlerSetTagValueInput}/>
+                        : <GroupedTags handlerSetTagValueInput={handlerSetTagValueInput}/>
                 }
             </div>
         </div>
